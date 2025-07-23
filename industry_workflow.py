@@ -186,7 +186,7 @@ if __name__ == "__main__":
     
     # 运行工作流
     flow = Flow(start=research)
-    shared_state = {"industry": "智能风控&大数据征信服务"}
+    shared_state = {"industry": "智能风控以及大数据征信服务"}
     result = flow.run(shared_state)
     
     # 保存结果

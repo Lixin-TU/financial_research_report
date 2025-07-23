@@ -33,7 +33,7 @@ class IndustryResearchFlow(Node):  # 研报生成的决策节点
 3) 完成研报生成
 
 要特别关注：
-- 核心经济指标数据（GDP、CPI、利率、汇率）的最新数据和趋势
+- 核心经济指标数据（GDP、CPI、利率、汇率、制造业PMI、房地产开发投资完成情况、工业企业利润、工业用电量）的最新数据和趋势
 - 重要政策文件与解读（如货币政策、财政政策等）
 - 区域经济对比数据与分析
 - 全球经济形势与联动影响
@@ -221,16 +221,18 @@ if __name__ == "__main__":
     research - "complete" >> complete
     search - "search_done" >> research
     generate - "continue" >> research
-      # 运行工作流
+
+
+     # 运行工作流
     flow = Flow(start=research)
     shared_state = {
         "industry": "生成式AI基建与算力投资趋势（2023-2026）",
-        "focus_areas": ["GDP", "CPI", "利率", "汇率"],
+        "focus_areas": ["GDP", "CPI", "利率", "汇率", "制造业PMI", "房地产开发投资完成情况", "工业企业利润", "工业用电量"],
         "analysis_type": "macro_economic"
     }
     result = flow.run(shared_state)
     
     # 保存结果
     if result:
-        with open("研报2.md", "w", encoding="utf-8") as f:
+        with open("宏观研报.md", "w", encoding="utf-8") as f:
             f.write(result)
