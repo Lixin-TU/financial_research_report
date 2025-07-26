@@ -152,7 +152,6 @@ docker run --rm -v ${PWD}\docker_outputs:/app/outputs research-agent:latest bash
 **质量控制体系**  
 - 8维度评估: 完整性、逻辑性、专业性、数据性、创新性、实用性、合规性、可读性
 - 智能改进循环: 自动识别问题并优化
-- 严格阈值: 总分≥8.5且CSA完全合规
 
 **多模态支持**
 - 中文字体自适应配置
