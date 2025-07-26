@@ -2,6 +2,7 @@
 # Load environment variables from .env file
 from dotenv import load_dotenv
 import os
+import argparse
 
 # Clear any existing environment variables first
 if 'OPENAI_API_KEY' in os.environ:
@@ -26,6 +27,24 @@ if api_key:
     print(f"API Key first 5 chars: {api_key[:5]}")
 
 # %%
+# 解析命令行参数
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='生成宏观经济研究报告')
+    parser.add_argument('--marco_name', type=str, required=True, 
+                       help='宏观主题名称，例如：生成式AI基建与算力投资趋势')
+    parser.add_argument('--time', type=str, required=True,
+                       help='时间范围，例如：2023-2026')
+    return parser.parse_args()
+
+# 获取命令行参数
+args = parse_arguments()
+target_marco_name = args.marco_name
+target_time_range = args.time
+
+print(f"目标宏观主题: {target_marco_name}")
+print(f"时间范围: {target_time_range}")
+
+# %%
 # Enhanced patch with China Securities Association compliance and strict formatting
 import macro_workflow
 import json
@@ -44,8 +63,22 @@ import locale
 from PIL import Image
 import io
 
-# Configure matplotlib for Chinese font display
-plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS', 'DejaVu Sans']
+# 查找可用的中文字体
+def get_chinese_font():
+    font_list = fm.findSystemFonts(fontpaths=None, fontext='ttf')
+    chinese_fonts = []
+    for font_path in font_list:
+        try:
+            font_prop = fm.FontProperties(fname=font_path)
+            font_name = font_prop.get_name()
+            if any(ord(char) > 127 for char in font_name) or 'SimHei' in font_name or 'WenQuanYi' in font_name:
+                chinese_fonts.append(font_name)
+        except:
+            continue
+    return chinese_fonts[0] if chinese_fonts else 'DejaVu Sans'
+
+# 设置中文字体
+plt.rcParams['font.sans-serif'] = [get_chinese_font(), 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
 # Set locale to handle Chinese characters properly
@@ -1213,7 +1246,7 @@ class MacroGenerateSection(GenerateSection):
         
         return "continue"
 
-def run_macro_research_workflow():
+def run_macro_research_workflow(marco_name, time_range):
     """运行宏观经济研究工作流"""
     try:
         print("🏛️ 启动宏观经济研究工作流(优化版)...")
@@ -1234,11 +1267,12 @@ def run_macro_research_workflow():
         # 运行工作流
         flow = Flow(start=research)
         shared_state = {
-            "industry": "生成式AI基建与算力投资趋势（2023-2026）",
+            "industry": f"{marco_name}（{time_range}）",  # 使用命令行参数
             "focus_areas": ["GDP", "CPI", "利率", "汇率", "制造业PMI", "房地产开发投资完成情况", "工业企业利润", "工业用电量"],
             "analysis_type": "macro_economic",
             "existing_info": "",
-            "data_period": "2023-2025年上半年",
+            "data_period": time_range,  # 使用命令行参数
+            "marco_theme": marco_name,  # 添加宏观主题
             # Initialize all counters in shared state
             "search_rounds": 0,
             "section_count": 0,
@@ -1281,15 +1315,12 @@ def run_macro_research_workflow():
         traceback.print_exc()
         return False
 
-# 执行宏观经济研究工作流
+# 执行宏观经济研究工作流 - 使用命令行参数
 print("🎯 启动优化版宏观经济研究系统...")
-print("  ✓ 明确的阶段划分和进度控制")
-print("  ✓ 有限的搜索轮次(最多3轮)") 
-print("  ✓ 专业的宏观经济分析章节")
-print("  ✓ 防止无限循环的强制终止机制")
-print("  ✓ 修复章节计数器同步问题")
+print(f"📊 宏观主题: {target_marco_name}")
+print(f"⏰ 时间范围: {target_time_range}")
 
-success = run_macro_research_workflow()
+success = run_macro_research_workflow(target_marco_name, target_time_range)  # 传入命令行参数
 print(f"\n🏁 宏观经济研究工作流结束，状态: {'✅ 成功' if success else '❌ 失败'}")
 
 

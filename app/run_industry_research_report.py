@@ -2,6 +2,7 @@
 # Load environment variables from .env file
 from dotenv import load_dotenv
 import os
+import argparse
 
 # Clear any existing environment variables first
 if 'OPENAI_API_KEY' in os.environ:
@@ -26,6 +27,20 @@ if api_key:
     print(f"API Key first 5 chars: {api_key[:5]}")
 
 # %%
+# 解析命令行参数
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='生成行业研究报告')
+    parser.add_argument('--industry_name', type=str, required=True, 
+                       help='行业名称，例如：智能风控&大数据征信服务')
+    return parser.parse_args()
+
+# 获取命令行参数
+args = parse_arguments()
+target_industry = args.industry_name
+
+print(f"目标行业: {target_industry}")
+
+# %%
 # Enhanced patch with China Securities Association compliance and strict formatting
 import industry_workflow
 import json
@@ -44,8 +59,22 @@ import locale
 from PIL import Image
 import io
 
-# Configure matplotlib for Chinese font display
-plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS', 'DejaVu Sans']
+# 查找可用的中文字体
+def get_chinese_font():
+    font_list = fm.findSystemFonts(fontpaths=None, fontext='ttf')
+    chinese_fonts = []
+    for font_path in font_list:
+        try:
+            font_prop = fm.FontProperties(fname=font_path)
+            font_name = font_prop.get_name()
+            if any(ord(char) > 127 for char in font_name) or 'SimHei' in font_name or 'WenQuanYi' in font_name:
+                chinese_fonts.append(font_name)
+        except:
+            continue
+    return chinese_fonts[0] if chinese_fonts else 'DejaVu Sans'
+
+# 设置中文字体
+plt.rcParams['font.sans-serif'] = [get_chinese_font(), 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
 # Set locale to handle Chinese characters properly
@@ -1266,7 +1295,7 @@ import traceback
 import time
 
 # 更新工作流执行函数
-def run_csa_compliant_workflow():
+def run_csa_compliant_workflow(industry_name):
     """运行符合证券业协会规定的研报生成工作流"""
     try:
         # 构建工作流
@@ -1287,7 +1316,7 @@ def run_csa_compliant_workflow():
         
         # 运行工作流
         flow = Flow(start=research)
-        shared_state = {"industry": "智能风控&大数据征信服务"}
+        shared_state = {"industry": industry_name}  # 使用命令行参数
         
         # 将共享状态传递给research节点
         research.shared_state = shared_state
@@ -1373,38 +1402,20 @@ def run_csa_compliant_workflow():
         traceback.print_exc()
         return False
 
-# 执行CSA合规工作流
+# 执行CSA合规工作流 - 使用命令行参数
 print("🎯 启动符合证券业协会规定的研报生成系统...")
+print(f"📊 目标行业: {target_industry}")
 print("📜 严格遵循《发布证券研究报告暂行规定》")
 print("💡 智能合规性验证：最多8次改进迭代")
 print("📊 极严格评分标准：≥8.5分才算优秀")
 print("🔍 增强搜索能力：最多6次搜索，每次更多结果")
 print("📈 独立图表生成：4个专业图表插入Word文档")
 
-success = run_csa_compliant_workflow()
+success = run_csa_compliant_workflow(target_industry)  # 传入命令行参数
 print(f"\n🏁 CSA合规工作流执行结束，状态: {'✅ 成功' if success else '❌ 失败'}")
 
 # 最终CSA合规验证
 if success:
     print("\n🔍 CSA合规要求验证:")
     print("  ✓ 格式与逻辑符合《发布证券研究报告暂行规定》")
-    print("  ✓ 论点-论据链完整清晰")
-    print("  ✓ 章节衔接流畅自然")
-    print("  ✓ 必要披露信息完整")
-    print("  ✓ 分析师声明与法律声明")
-    print("  ✓ 风险提示充分完整")
-    print("  ✓ 专业术语使用规范")
-    print("  ✓ 数据来源标注清楚")
-    print("  ✓ 投资建议客观中性")
-    print("  ✓ 独立图表文件生成")
-    print("  ✓ Word文档图表插入")
-    print("  ✓ 极严格质量控制")
-
-# %%
-print("CSA-compliant industry research report generation system fully operational!")
-print("符合中国证券业协会《发布证券研究报告暂行规定》的研报生成系统已完全启用！")
-
-# %% [markdown]
-# 
-
 

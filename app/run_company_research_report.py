@@ -2,6 +2,7 @@
 # Load environment variables from .env file
 from dotenv import load_dotenv
 import os
+import argparse
 
 # Clear any existing environment variables first
 if 'OPENAI_API_KEY' in os.environ:
@@ -26,10 +27,28 @@ if api_key:
     print(f"API Key first 5 chars: {api_key[:5]}")
 
 # %%
-# 配置目标公司
-target_company = "商汤科技"
-target_company_code = "00020"
-target_company_market = "HK"
+# 解析命令行参数
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='生成公司研究报告')
+    parser.add_argument('--company_name', type=str, required=True, 
+                       help='公司名称，例如：商汤科技')
+    parser.add_argument('--company_code', type=str, required=True,
+                       help='公司股票代码，例如：00020.HK')
+    return parser.parse_args()
+
+# 获取命令行参数
+args = parse_arguments()
+target_company = args.company_name
+# 解析股票代码，分离代码和市场
+if '.' in args.company_code:
+    target_company_code, target_company_market = args.company_code.split('.', 1)
+else:
+    target_company_code = args.company_code
+    target_company_market = "HK"  # 默认香港市场
+
+print(f"目标公司: {target_company}")
+print(f"股票代码: {target_company_code}")
+print(f"交易市场: {target_company_market}")
 
 # %%
 # Enhanced company research report evaluation and generation system
@@ -38,6 +57,25 @@ import yaml
 import re
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+
+# 查找可用的中文字体
+def get_chinese_font():
+    font_list = fm.findSystemFonts(fontpaths=None, fontext='ttf')
+    chinese_fonts = []
+    for font_path in font_list:
+        try:
+            font_prop = fm.FontProperties(fname=font_path)
+            font_name = font_prop.get_name()
+            if any(ord(char) > 127 for char in font_name) or 'SimHei' in font_name or 'WenQuanYi' in font_name:
+                chinese_fonts.append(font_name)
+        except:
+            continue
+    return chinese_fonts[0] if chinese_fonts else 'DejaVu Sans'
+
+# 设置中文字体
+plt.rcParams['font.sans-serif'] = [get_chinese_font(), 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -49,10 +87,6 @@ from docx.shared import RGBColor
 import os
 import shutil
 import traceback
-
-# Configure matplotlib for Chinese font display
-plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS', 'DejaVu Sans']
-plt.rcParams['axes.unicode_minus'] = False
 
 def evaluate_company_report_strict(report_content, company_name):
     """
@@ -683,7 +717,7 @@ try:
 
 ### 1.1 基本信息
 - 公司全称: {target_company}
-- 股票代码: {target_company_code}.{target_company_market}
+- 股票代码: {target_company_code}
 - 成立时间: 2014年
 - 总部位置: 北京
 - 主要业务: 人工智能技术研发与应用
