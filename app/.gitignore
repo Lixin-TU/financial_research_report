@@ -164,7 +164,7 @@ images/*.png
 images/*.jpg
 images/*.jpeg
 images/*.svg
-*.png
+
 *.jpg
 *.jpeg
 *.svg
